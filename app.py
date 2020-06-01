@@ -78,7 +78,7 @@ def add_book_form():
             )
             db.session.add(book)
             db.session.commit()
-            return f"Book added. book id={book,id}"
+            return f"Book added. book id={book.id}"
         except Exception as e:
             return(str(e))
     return render_template("getdata.html")
