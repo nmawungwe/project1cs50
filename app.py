@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask, session, request, jsonify
+from flask import Flask, session, request, jsonify, render_template
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
@@ -62,6 +62,27 @@ def get_by_id(id_):
         return jsonify(book.serialize())
     except Exception as e:
 	    return(str(e))
+
+
+@app.route("/add/form",methods=['GET', 'POST'])
+def add_book_form():
+    if request.method == 'POST':
+        name=request.form.get('name')
+        author=request.form.get('author')
+        published=request.form.get('published')
+        try:
+            book=Book(
+                name=name,
+                author=author,
+                published=published
+            )
+            db.session.add(book)
+            db.session.commit()
+            return f"Book added. book id={book,id}"
+        except Exception as e:
+            return(str(e))
+    return render_template("getdata.html")
+
 
 if __name__ == '__main__':
     app.run()
