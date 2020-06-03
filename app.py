@@ -7,6 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from config import DevelopmentConfig
 
+
+
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 
@@ -23,6 +25,8 @@ Session(app)
 # engine = create_engine(os.getenv("DATABASE_URL"))
 # db = scoped_session(sessionmaker(bind=engine))
 db = SQLAlchemy(app)
+
+# set up login LoginManager
 
 from models import Book
 
