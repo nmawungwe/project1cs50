@@ -1,11 +1,12 @@
 import os
 
-from flask import Flask, session, request, jsonify, render_template
+from flask import Flask, session, request, jsonify, render_template, flash, redirect, url_for
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from config import DevelopmentConfig
+from forms import LoginForm
 
 
 
@@ -45,6 +46,14 @@ def index():
         }
     ]
     return render_template('index.html', title='Home', user=user, reviews=reviews)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        flash(f'Login requested for user {form.username.data}, remember_me={form.remember_me.data}')
+        return redirect({{ url_for('index') }})
+    return render_template('login.html', title='Sign In', form=form)
 
 @app.route("/add")
 def add_book():
