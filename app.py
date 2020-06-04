@@ -28,11 +28,23 @@ db = SQLAlchemy(app)
 
 # set up login LoginManager
 
-from models import Book
+from models import Book, User, Review
 
 @app.route("/")
-def hello():
-    return "Hello World!"
+@app.route("/index")
+def index():
+    user = {'username': 'Nyasha'}
+    reviews = [
+        {
+            'author': {'username': 'John'},
+            'body': 'Beautiful day in Portland!'
+        },
+        {
+            'author': {'username': 'Susan'},
+            'body': 'The Avengers movie was so cool!'
+        }
+    ]
+    return render_template('index.html', title='Home', user=user, reviews=reviews)
 
 @app.route("/add")
 def add_book():
@@ -86,6 +98,14 @@ def add_book_form():
         except Exception as e:
             return(str(e))
     return render_template("getdata.html")
+
+
+
+
+
+@app.shell_context_processor
+def make_shell_context():
+    return {'db': db, 'User': User, 'Review': Review}
 
 
 if __name__ == '__main__':
