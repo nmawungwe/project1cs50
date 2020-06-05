@@ -35,7 +35,7 @@ login = LoginManager(app)
 from models import Book, User, Review
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 @app.route("/index")
 def index():
     user = {'username': 'Nyasha'}
