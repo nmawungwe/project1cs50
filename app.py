@@ -9,9 +9,8 @@ from config import DevelopmentConfig
 from forms import LoginForm
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
-
-
-
+from forms import RegistrationForm
+from models import db, login
 
 
 app = Flask(__name__)
@@ -26,14 +25,17 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
+
+# set up login LoginManager
+# login = LoginManager()
+login.login_view = 'login'
+login.init_app(app)
+
 # Set up database
 # engine = create_engine(os.getenv("DATABASE_URL"))
 # db = scoped_session(sessionmaker(bind=engine))
-db = SQLAlchemy(app)
-
-# set up login LoginManager
-login = LoginManager(app)
-login.login_view = 'login'
+db.init_app(app)
 
 from models import Book, User, Review
 
@@ -66,6 +68,20 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
  
 @app.route("/add")
 def add_book():
