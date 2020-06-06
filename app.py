@@ -7,7 +7,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from config import DevelopmentConfig
 from forms import LoginForm
-from flask_login import LoginManager, current_user, login_user, logout_user
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from werkzeug.urls import url_parse
+
 
 
 
@@ -31,29 +33,19 @@ db = SQLAlchemy(app)
 
 # set up login LoginManager
 login = LoginManager(app)
+login.login_view = 'login'
 
 from models import Book, User, Review
 
 
 @app.route("/", methods=['GET', 'POST'])
 @app.route("/index")
+@login_required
 def index():
-    user = {'username': 'Nyasha'}
-    reviews = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
-    return render_template('index.html', title='Home', user=user, reviews=reviews)
+    return render_template('index.html', title='Home')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm()
@@ -61,9 +53,12 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
-            return redirect(url_for('login'))
+            return redirect(url_for('login'))    
         login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)        
     return render_template('login.html', title='Sign In', form=form)
 
 
